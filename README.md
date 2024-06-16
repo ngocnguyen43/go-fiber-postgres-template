@@ -4,7 +4,16 @@ One Paragraph of project description goes here
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+## Generate Swagger Docs
+
+Default API docs
+URL: http://localhost:8080/swagger/index.html
+
+generate APIs docs
+```bash
+swag init -d ./cmd/api,./
+```
 
 ## MakeFile
 
@@ -21,16 +30,6 @@ make build
 run the application
 ```bash
 make run
-```
-
-Create DB container
-```bash
-make docker-run
-```
-
-Shutdown DB container
-```bash
-make docker-down
 ```
 
 live reload the application

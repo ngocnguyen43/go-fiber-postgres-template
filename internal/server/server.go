@@ -21,6 +21,5 @@ func New() *FiberServer {
 
 		db: database.New(),
 	}
-
 	return server
 }

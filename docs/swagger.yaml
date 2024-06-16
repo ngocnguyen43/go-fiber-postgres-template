@@ -1,0 +1,53 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: This is a sample swagger for Fiber
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fiber Example API
+  version: "1.0"
+paths:
+  /:
+    get:
+      description: Hello World
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Hello World example
+      tags:
+      - Hello World
+  /health:
+    get:
+      description: check server health
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health example
+      tags:
+      - Health
+swagger: "2.0"

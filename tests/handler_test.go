@@ -17,7 +17,7 @@ func TestHandler(t *testing.T) {
 	// Define a route in the Fiber app
 	app.Get("/", s.HelloWorldHandler)
 	// Create a test HTTP request
-	req, err := http.NewRequest("GET", "/", http.NoBody) //nolint:noctx // kepp this line
+	req, err := http.NewRequest("GET", "/", http.NoBody) //nolint:noctx // keep this line
 	if err != nil {
 		t.Fatalf("error creating request. Err: %v", err)
 	}

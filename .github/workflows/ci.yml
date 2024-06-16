@@ -1,0 +1,44 @@
+name: CI
+on:  
+  push:
+    branches:
+      - main
+      - master
+      - dev
+  pull_request:
+
+jobs:
+  tests:
+    uses: ./.github/workflows/test.yml  
+  ci:
+    runs-on: ubuntu-latest
+    needs: [tests]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: './go.mod'
+    
+      - name: Check and get dependencies
+        run: |
+              go mod tidy
+              git diff --exit-code go.mod
+              # git diff --exit-code go.sum
+    
+      - name: Install plugins
+        run: |
+              git clone https://github.com/golangci/example-plugin-linter.git
+              cd example-plugin-linter
+              go build -o '${{ github.workspace }}/.plugins/example.so' -buildmode=plugin plugin/example.go
+        working-directory: ${{ runner.temp }}
+        env:
+              CGO_ENABLED: 1
+    
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+              version: v1.59.1
+              # The installation mode `goinstall` always uses `CGO_ENABLED=1`.
+              install-mode: goinstall
+              args: --timeout=10m

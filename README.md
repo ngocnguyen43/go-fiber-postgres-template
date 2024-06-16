@@ -7,8 +7,8 @@ One Paragraph of project description goes here
 
 ## Generate Swagger Docs
 
-Default API docs
-URL: http://localhost:8080/swagger/index.html
+default API docs<br>
+http://localhost:8080/swagger/index.html
 
 generate APIs docs
 ```bash

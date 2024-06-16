@@ -1,11 +1,12 @@
 package tests
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-postgres-template/internal/server"
 	"io"
 	"net/http"
 	"testing"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func TestHandler(t *testing.T) {
@@ -16,13 +17,14 @@ func TestHandler(t *testing.T) {
 	// Define a route in the Fiber app
 	app.Get("/", s.HelloWorldHandler)
 	// Create a test HTTP request
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest("GET", "/", http.NoBody) //nolint:noctx // kepp this line
 	if err != nil {
 		t.Fatalf("error creating request. Err: %v", err)
 	}
 	// Perform the request
 	resp, err := app.Test(req)
 	if err != nil {
+		resp.Body.Close()
 		t.Fatalf("error making request to server. Err: %v", err)
 	}
 	// Your test assertions...

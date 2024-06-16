@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go-fiber-postgres-template/internal/server"
+	internalServer "go-fiber-postgres-template/internal/server"
 	"os"
 	"strconv"
 
@@ -10,8 +10,7 @@ import (
 )
 
 func main() {
-
-	server := server.New()
+	server := internalServer.New()
 
 	server.RegisterFiberRoutes()
 	port, _ := strconv.Atoi(os.Getenv("PORT"))

@@ -38,6 +38,11 @@ var (
 	dbInstance *service
 )
 
+const (
+	dbWaitCount      = 1000
+	dbConnectionPool = 40
+)
+
 func New() Service {
 	// Reuse Connection
 	if dbInstance != nil {
@@ -67,7 +72,7 @@ func (s *service) Health() map[string]string {
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Fatalf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
+		log.Panicf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
 		return stats
 	}
 
@@ -86,11 +91,11 @@ func (s *service) Health() map[string]string {
 	stats["max_lifetime_closed"] = strconv.FormatInt(dbStats.MaxLifetimeClosed, 10)
 
 	// Evaluate stats to provide a health message
-	if dbStats.OpenConnections > 40 { // Assuming 50 is the max for this example
+	if dbStats.OpenConnections > dbConnectionPool { // Assuming 50 is the max for this example
 		stats["message"] = "The database is experiencing heavy load."
 	}
 
-	if dbStats.WaitCount > 1000 {
+	if dbStats.WaitCount > dbWaitCount {
 		stats["message"] = "The database has a high number of wait events, indicating potential bottlenecks."
 	}
 
@@ -99,7 +104,7 @@ func (s *service) Health() map[string]string {
 	}
 
 	if dbStats.MaxLifetimeClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern."
+		stats["message"] = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern." //nolint:lll //keep this line
 	}
 
 	return stats

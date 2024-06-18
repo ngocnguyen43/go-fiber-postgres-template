@@ -2,12 +2,16 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+	"go-fiber-postgres-template/pkg/auth"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
@@ -25,7 +29,7 @@ type Service interface {
 }
 
 type service struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 var (
@@ -34,7 +38,6 @@ var (
 	username   = os.Getenv("DB_USERNAME")
 	port       = os.Getenv("DB_PORT")
 	host       = os.Getenv("DB_HOST")
-	schema     = os.Getenv("DB_SCHEMA")
 	dbInstance *service
 )
 
@@ -44,15 +47,34 @@ const (
 )
 
 func New() Service {
+	var newLogger = logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      true,          // Don't include params in the SQL log
+			Colorful:                  false,         // Disable color
+		},
+	)
 	// Reuse Connection
 	if dbInstance != nil {
 		return dbInstance
 	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, username, password, database, port)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = db.Migrator().CreateTable(&auth.RefreshToken{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	dbInstance = &service{
 		db: db,
 	}
@@ -68,20 +90,27 @@ func (s *service) Health() map[string]string {
 	stats := make(map[string]string)
 
 	// Ping the database
-	err := s.db.PingContext(ctx)
+	postgresDB, err := s.db.DB()
+
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
 		log.Panicf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
 		return stats
 	}
-
+	err = postgresDB.PingContext(ctx)
+	if err != nil {
+		stats["status"] = "down"
+		stats["error"] = fmt.Sprintf("db down: %v", err)
+		log.Panicf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
+		return stats
+	}
 	// Database is up, add more statistics
 	stats["status"] = "up"
 	stats["message"] = "It's healthy"
 
 	// Get database stats (like open connections, in use, idle, etc.)
-	dbStats := s.db.Stats()
+	dbStats := postgresDB.Stats()
 	stats["open_connections"] = strconv.Itoa(dbStats.OpenConnections)
 	stats["in_use"] = strconv.Itoa(dbStats.InUse)
 	stats["idle"] = strconv.Itoa(dbStats.Idle)
@@ -106,7 +135,6 @@ func (s *service) Health() map[string]string {
 	if dbStats.MaxLifetimeClosed > int64(dbStats.OpenConnections)/2 {
 		stats["message"] = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern." //nolint:lll //keep this line
 	}
-
 	return stats
 }
 
@@ -116,5 +144,6 @@ func (s *service) Health() map[string]string {
 // If an error occurs while closing the connection, it returns the error.
 func (s *service) Close() error {
 	log.Printf("Disconnected from database: %s", database)
-	return s.db.Close()
+	postgresDB, _ := s.db.DB()
+	return postgresDB.Close()
 }

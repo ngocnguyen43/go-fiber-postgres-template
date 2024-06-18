@@ -31,9 +31,9 @@ func main() {
 		Format: "[${ip}]:${port} ${status} ${latency} - ${method} ${path} \n",
 	}))
 	server.RegisterFiberRoutes()
-	server.Get("/swagger/*", swagger.HandlerDefault) // default
+	server.Get("/docs/*", swagger.HandlerDefault) // default
 
-	server.Get("/swagger/*", swagger.New(swagger.Config{ // custom
+	server.Get("/docs/*", swagger.New(swagger.Config{ // custom
 		URL:         "http://example.com/doc.json",
 		DeepLinking: false,
 		// Expand ("list") or Collapse ("none") tag groups by default

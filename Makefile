@@ -13,6 +13,14 @@ build:
 run:
 	@go run cmd/api/main.go
 
+# Run database migrations up
+migrate-up:
+	@go run cmd/migrate/main.go --exec up
+
+# Run database migrations down
+migrate-down:
+	@go run cmd/migrate/main.go --exec down
+
 # Create DB container
 docker-run:
 	@if docker compose up 2>/dev/null; then \

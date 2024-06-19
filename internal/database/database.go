@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"go-fiber-postgres-template/pkg/auth"
 	"log"
 	"os"
 	"strconv"
@@ -66,11 +65,6 @@ func New() Service {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = db.Migrator().CreateTable(&auth.RefreshToken{})
-
 	if err != nil {
 		log.Fatal(err)
 	}

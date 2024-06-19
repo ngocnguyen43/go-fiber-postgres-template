@@ -28,8 +28,20 @@ linters-settings:
           - "!**/pkg/logutils/**.go"
   dupl:
     threshold: 100
+  errcheck:
+    # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
+    # default is false: such cases aren't reported by default.
+    check-type-assertions: false
+
+    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
+    # default is false: such cases aren't reported by default.
+    check-blank: false
+
+    # [deprecated] comma-separated list of pairs of the form pkg:regex
+    # the regex is used to ignore names within pkg. (default "fmt:.*").
+    # see https://github.com/kisielk/errcheck#the-deprecated-method for details
   funlen:
-    lines: -1 # the number of lines (code + empty lines) is not a right metric and leads to code without empty line or one-liner.
+    lines: 60 # the number of lines (code + empty lines) is not a right metric and leads to code without empty line or one-liner.
     statements: 50
   goconst:
     min-len: 2
@@ -72,6 +84,7 @@ linters-settings:
     ignored-functions:
       - strings.SplitN
   govet:
+    shadowing: true
     settings:
       printf:
         funcs:
@@ -103,43 +116,15 @@ linters-settings:
       - name: unused-receiver
 
 linters:
-  disable-all: true
   enable:
-    - bodyclose
-    - depguard
-    - dogsled
-    - dupl
-    - errcheck
-    - errorlint
-    - exportloopref
-    - funlen
-    - gocheckcompilerdirectives
-    - gochecknoinits
-    - goconst
-    - gocritic
-    - gocyclo
-    - godox
-    - gofmt
-    - goimports
-    - mnd
-    - goprintffuncname
-    - gosec
-    - gosimple
     - govet
-    - ineffassign
-    - lll
-    - misspell
-    - nakedret
-    - noctx
-    - nolintlint
-    - revive
-    - staticcheck
-    - stylecheck
-    - testifylint
-    - unconvert
-    - unparam
+  disable:
+    - prealloc
+  disable-all: false
+  presets:
+    - bugs
     - unused
-    - whitespace
+  fast: false
 
   # This list of linters is not a recommendation (same thing for all this configuration file).
   # We intentionally use a limited set of linters.

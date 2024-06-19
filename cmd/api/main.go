@@ -26,7 +26,6 @@ import (
 // @BasePath		/
 func main() {
 	server := internalServer.New()
-
 	server.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} ${latency} - ${method} ${path} \n",
 	}))

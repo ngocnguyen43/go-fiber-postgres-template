@@ -1,4 +1,10 @@
 basePath: /
+definitions:
+  core.ErrorResponse:
+    properties:
+      details:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -22,12 +28,10 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/core.ErrorResponse'
       summary: Hello World example
       tags:
       - Hello World
@@ -41,12 +45,10 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/core.ErrorResponse'
       summary: Health example
       tags:
       - Health

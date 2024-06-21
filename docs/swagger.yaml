@@ -32,6 +32,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/core.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/core.ErrorResponse'
       summary: Hello World example
       tags:
       - Hello World
@@ -47,6 +51,10 @@ paths:
             type: object
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrorResponse'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/core.ErrorResponse'
       summary: Health example

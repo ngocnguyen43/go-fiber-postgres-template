@@ -4,6 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"go-fiber-postgres-template/internal/database"
+
+	"github.com/goccy/go-json"
 )
 
 type FiberServer struct {
@@ -17,6 +19,8 @@ func New() *FiberServer {
 		App: fiber.New(fiber.Config{
 			ServerHeader: "go-fiber-postgres-template",
 			AppName:      "go-fiber-postgres-template",
+			JSONEncoder:  json.Marshal,
+			JSONDecoder:  json.Unmarshal,
 		}),
 
 		db: database.New(),

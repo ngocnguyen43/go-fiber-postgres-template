@@ -39,6 +39,12 @@
                         "schema": {
                             "$ref": "#/definitions/core.ErrorResponse"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/core.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -62,6 +68,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/core.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/core.ErrorResponse"
                         }

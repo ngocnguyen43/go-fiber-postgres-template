@@ -2,8 +2,7 @@ package auth
 
 import (
 	"database/sql/driver"
-
-	"gorm.io/gorm"
+	"go-fiber-postgres-template/pkg/core"
 )
 
 type RefreshTokenStatus string
@@ -26,7 +25,7 @@ func (st RefreshTokenStatus) Value() (driver.Value, error) {
 }
 
 type RefreshToken struct {
-	gorm.Model
+	core.BaseModel
 	Jti    string             `gorm:"not null" json:"jti"`
 	Parent string             `gorm:"foreignkey:RefreshToken.ID;default:null" json:"parent"`
 	Status RefreshTokenStatus `gorm:"not null type:num('new','used');default:'new'" json:"status"`

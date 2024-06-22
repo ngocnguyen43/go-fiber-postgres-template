@@ -12,7 +12,7 @@ http://localhost:8080/docs
 
 generate APIs docs
 ```bash
-swag init -d ./cmd/api,./
+swag init -d ./cmd/api,./ --parseDependency --parseInternal
 ```
 
 ## MakeFile

@@ -1,8 +1,31 @@
 basePath: /
 definitions:
-  core.ErrorResponse:
+  go-fiber-postgres-template_pkg_core.ErrorResponse:
     properties:
       details:
+        type: string
+    type: object
+  pkg_user.User:
+    properties:
+      createdAt:
+        example: "2022-01-01T00:00:00Z"
+        format: date-time
+        type: string
+      deletedAt:
+        type: string
+      email:
+        type: string
+      id:
+        example: 1
+        format: int64
+        type: integer
+      names:
+        type: string
+      password:
+        type: string
+      updatedAt:
+        type: string
+      username:
         type: string
     type: object
 host: localhost:8080
@@ -31,11 +54,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/core.ErrorResponse'
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/core.ErrorResponse'
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
       summary: Hello World example
       tags:
       - Hello World
@@ -52,12 +75,64 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/core.ErrorResponse'
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/core.ErrorResponse'
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
       summary: Health example
       tags:
       - Health
+  /users:
+    get:
+      description: Retrieves a list of all users from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/pkg_user.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
+      summary: Get All Users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user in the database
+      parameters:
+      - description: The input user struct
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_user.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/pkg_user.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
+      summary: Create a New User
+      tags:
+      - Users
 swagger: "2.0"

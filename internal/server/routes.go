@@ -1,6 +1,7 @@
 package server
 
 import (
+	"go-fiber-postgres-template/pkg/auth"
 	"go-fiber-postgres-template/pkg/core"
 	"go-fiber-postgres-template/pkg/user"
 
@@ -10,10 +11,9 @@ import (
 func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/", core.IsAuthenticated(), s.HelloWorldHandler)
 	s.App.Get("/health", s.healthHandler)
-	app := s.App
-
+	app := s.App.Group("/api")
 	user.UserRouters(app)
-
+	auth.AuthRouters(app)
 }
 
 // /	 Hello World godoc
@@ -22,8 +22,6 @@ func (s *FiberServer) RegisterFiberRoutes() {
 //	@Description	Hello World
 //	@Tags			Hello World
 //	@Success		200	{object} map[string]string
-//	@Failure		400	{object} core.ErrorResponse
-//	@Failure		401	{object} core.ErrorResponse
 //	@Router			/ [get]
 func (*FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
 	resp := fiber.Map{
@@ -39,8 +37,6 @@ func (*FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
 //	@Description	check server health
 //	@Tags			Health
 //	@Success		200	{object} map[string]string
-//	@Failure		400	{object} core.ErrorResponse
-//	@Failure		401	{object} core.ErrorResponse
 //	@Router			/health [get]
 func (s *FiberServer) healthHandler(c *fiber.Ctx) error {
 	return c.JSON(s.db.Health())

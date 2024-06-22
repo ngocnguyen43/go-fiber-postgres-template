@@ -39,18 +39,6 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
-                        }
                     }
                 }
             }
@@ -71,17 +59,36 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "Register a new user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "The input user struct",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
+                            "$ref": "#/definitions/pkg_auth.RegisterRequest"
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
+                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_user.User"
                         }
                     }
                 }
@@ -105,18 +112,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/pkg_user.User"
                             }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
                         }
                     }
                 }
@@ -150,28 +145,58 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg_user.User"
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse"
-                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "go-fiber-postgres-template_pkg_core.ErrorResponse": {
+        "go-fiber-postgres-template_pkg_user.User": {
             "type": "object",
             "properties": {
-                "details": {
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-01-01T00:00:00Z"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1
+                },
+                "names": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "pkg_auth.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "names": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -216,7 +241,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Fiber Example API",
 	Description:      "This is a sample swagger for Fiber",

@@ -13,8 +13,6 @@ import (
 //	@Tags			Users
 //	@Produce		json
 //	@Success		200	{array} User
-//	@Failure		400	{object} core.ErrorResponse
-//	@Failure		401	{object} core.ErrorResponse
 //	@Router			/users [get]
 func GetAllUsers(c *fiber.Ctx) error {
 	db := database.New().GetInstance()
@@ -32,8 +30,6 @@ func GetAllUsers(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			data	body	User	true	"The input user struct"
 //	@Success		200		{object}	User			"ok"
-//	@Failure		400		{object}	core.ErrorResponse	"Bad Request"
-//	@Failure		500		{object}	core.ErrorResponse	"Internal Server Error"
 //	@Router			/users [post]
 func CreateUser(c *fiber.Ctx) error {
 	db := database.New().GetInstance()

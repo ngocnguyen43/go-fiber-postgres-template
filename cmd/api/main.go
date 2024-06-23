@@ -14,16 +14,20 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// @title			Fiber Example API
-// @version		1.0
-// @description	This is a sample swagger for Fiber
-// @termsOfService	http://swagger.io/terms/
-// @contact.name	API Support
-// @contact.email	fiber@swagger.io
-// @license.name	Apache 2.0
-// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-// @host			localhost:8080
-// @BasePath		/api
+//	@title						Fiber Example API
+//	@version					1.0
+//	@description				This is a sample swagger for Fiber
+//	@termsOfService				http://swagger.io/terms/
+//	@contact.name				API Support
+//	@contact.email				fiber@swagger.io
+//	@license.name				Apache 2.0
+//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+//	@host						localhost:8080
+//	@BasePath					/api
+//	@securityDefinitions.apiKey	JWT
+//	@in							header
+//	@name						Authorization
+
 func main() {
 	server := internalServer.New()
 	server.Use(logger.New(logger.Config{

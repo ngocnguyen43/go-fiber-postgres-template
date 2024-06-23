@@ -1,26 +1,17 @@
 basePath: /api
 definitions:
-  go-fiber-postgres-template_pkg_user.User:
+  pkg_auth.AuthResponse:
     properties:
-      createdAt:
-        example: "2022-01-01T00:00:00Z"
-        format: date-time
+      access_token:
         type: string
-      deletedAt:
+      refresh_token:
         type: string
+    type: object
+  pkg_auth.LoginRequest:
+    properties:
       email:
         type: string
-      id:
-        example: 1
-        format: int64
-        type: integer
-      names:
-        type: string
       password:
-        type: string
-      updatedAt:
-        type: string
-      username:
         type: string
     type: object
   pkg_auth.RegisterRequest:
@@ -96,6 +87,26 @@ paths:
       summary: Health example
       tags:
       - Health
+  /login:
+    post:
+      description: Login
+      parameters:
+      - description: The input user struct
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_auth.AuthResponse'
+      summary: Login
+      tags:
+      - Auth
   /register:
     post:
       description: Register a new user
@@ -112,7 +123,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_user.User'
+            $ref: '#/definitions/pkg_auth.AuthResponse'
       summary: Register a new user
       tags:
       - Auth
@@ -128,6 +139,8 @@ paths:
             items:
               $ref: '#/definitions/pkg_user.User'
             type: array
+      security:
+      - JWT: []
       summary: Get All Users
       tags:
       - Users
@@ -152,4 +165,9 @@ paths:
       summary: Create a New User
       tags:
       - Users
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -14,6 +14,8 @@ import (
 //	@Produce		json
 //	@Success		200	{array} User
 //	@Router			/users [get]
+//
+// @Security JWT
 func GetAllUsers(c *fiber.Ctx) error {
 	db := database.New().GetInstance()
 	var users []User

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
@@ -25,6 +26,15 @@ type RegisterRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Names    string `json:"names"`
+}
+
+func generateSalt(size int) ([]byte, error) {
+	salt := make([]byte, size)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return nil, err
+	}
+	return salt, nil
 }
 
 func hashPassword(password string, salt []byte) string {

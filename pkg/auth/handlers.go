@@ -1,22 +1,14 @@
 package auth
 
 import (
-	"crypto/rand"
+	"go-fiber-postgres-template/internal/database"
 	"go-fiber-postgres-template/pkg/user"
 
+	"github.com/google/uuid"
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/gofiber/fiber/v2"
 )
-
-func generateSalt(size int) ([]byte, error) {
-	salt := make([]byte, size)
-	_, err := rand.Read(salt)
-	if err != nil {
-		return nil, err
-	}
-	return salt, nil
-}
 
 // Register godoc
 //
@@ -24,11 +16,11 @@ func generateSalt(size int) ([]byte, error) {
 //	@Description	Register a new user
 //	@Tags			Auth
 //	@Produce		json
-//	@Param			data	body	RegisterRequest	true	"The input user struct"
-//	@Success		200	{object} user.User
+//	@Param			data	body		RegisterRequest	true	"The input user struct"
+//	@Success		200		{object}	AuthResponse
 //	@Router			/register [post]
 func Register(c *fiber.Ctx) error {
-	// db := database.New().GetInstance()
+	db := database.New().GetInstance()
 
 	user := new(user.User)
 
@@ -37,12 +29,69 @@ func Register(c *fiber.Ctx) error {
 	if err := register.bind(c, user); err != nil {
 		return err
 	}
-	// salt, _ := generateSalt(10)
-	// hash := hashPasswordPbkd2("mninhngocnguyen", salt)
-	// fmt.Println(verifyPassword(hash, "123"))
-	// err := db.Create(&user).Error
-	// if err != nil {
-	// 	return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	// }
-	return c.JSON(user)
+	err := db.Create(&user).Error
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	refreshToken := RefreshToken{
+		Jti:    uuid.NewString(),
+		Parent: nil,
+		Status: New,
+	}
+	err = db.Create(&refreshToken).Error
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	at, rt, err := refreshToken.GenerateTokenPairs(*user)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(AuthResponse{
+		RefreshToken: rt,
+		AccessToken:  at,
+	})
+}
+
+// Login godoc
+//
+//	@Summary		Login
+//	@Description	Login
+//	@Tags			Auth
+//	@Produce		json
+//	@Param			data	body		LoginRequest	true	"The input user struct"
+//	@Success		200		{object}	AuthResponse
+//	@Router			/login [post]
+func Login(c *fiber.Ctx) error {
+	db := database.New().GetInstance()
+
+	loginRequest := &LoginRequest{}
+	if err := c.BodyParser(&loginRequest); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	result := user.User{}
+	db.Where(user.User{
+		Email: loginRequest.Email,
+	}).First(&result)
+	refreshToken := RefreshToken{
+		Jti:    uuid.NewString(),
+		Parent: nil,
+		Status: New,
+	}
+	verifyPassword := VerifyPassword(result.Password, loginRequest.Password)
+	if !verifyPassword {
+		return fiber.NewError(fiber.StatusBadRequest, "authenticate failed ")
+	}
+	err := db.Create(&refreshToken).Error
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	at, rt, err := refreshToken.GenerateTokenPairs(result)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(AuthResponse{
+		RefreshToken: rt,
+		AccessToken:  at,
+	})
 }

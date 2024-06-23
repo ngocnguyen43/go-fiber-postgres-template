@@ -63,6 +63,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/login": {
+            "post": {
+                "description": "Login",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "The input user struct",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pkg_auth.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_auth.AuthResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "Register a new user",
@@ -88,7 +119,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-fiber-postgres-template_pkg_user.User"
+                            "$ref": "#/definitions/pkg_auth.AuthResponse"
                         }
                     }
                 }
@@ -96,6 +127,11 @@ const docTemplate = `{
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieves a list of all users from the database",
                 "produces": [
                     "application/json"
@@ -151,35 +187,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "go-fiber-postgres-template_pkg_user.User": {
+        "pkg_auth.AuthResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string",
-                    "format": "date-time",
-                    "example": "2022-01-01T00:00:00Z"
-                },
-                "deletedAt": {
+                "access_token": {
                     "type": "string"
                 },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "pkg_auth.LoginRequest": {
+            "type": "object",
+            "properties": {
                 "email": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer",
-                    "format": "int64",
-                    "example": 1
-                },
-                "names": {
-                    "type": "string"
-                },
                 "password": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -233,6 +258,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

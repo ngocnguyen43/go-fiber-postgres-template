@@ -27,6 +27,6 @@ func (st RefreshTokenStatus) Value() (driver.Value, error) {
 type RefreshToken struct {
 	core.BaseModel
 	Jti    string             `gorm:"not null" json:"jti"`
-	Parent string             `gorm:"foreignkey:RefreshToken.ID;default:null" json:"parent"`
+	Parent *string            `gorm:"foreignkey:RefreshToken.ID;default:null" json:"parent"`
 	Status RefreshTokenStatus `gorm:"not null type:num('new','used');default:'new'" json:"status"`
 }

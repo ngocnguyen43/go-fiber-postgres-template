@@ -14,16 +14,20 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// @title			Fiber Example API
-// @version		1.0
-// @description	This is a sample swagger for Fiber
-// @termsOfService	http://swagger.io/terms/
-// @contact.name	API Support
-// @contact.email	fiber@swagger.io
-// @license.name	Apache 2.0
-// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-// @host			localhost:8080
-// @BasePath		/
+//	@title						Fiber Example API
+//	@version					1.0
+//	@description				This is a sample swagger for Fiber
+//	@termsOfService				http://swagger.io/terms/
+//	@contact.name				API Support
+//	@contact.email				fiber@swagger.io
+//	@license.name				Apache 2.0
+//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+//	@host						localhost:8080
+//	@BasePath					/api
+//	@securityDefinitions.apiKey	JWT
+//	@in							header
+//	@name						Authorization
+
 func main() {
 	server := internalServer.New()
 	server.Use(logger.New(logger.Config{
@@ -37,13 +41,6 @@ func main() {
 		DeepLinking: false,
 		// Expand ("list") or Collapse ("none") tag groups by default
 		DocExpansion: "none",
-		// Prefill OAuth ClientId on Authorize popup
-		OAuth: &swagger.OAuthConfig{
-			AppName:  "OAuth Provider",
-			ClientId: "21bb4edc-05a7-4afc-86f1-2e151e4ba6e2",
-		},
-		// Ability to change OAuth2 redirect uri location
-		OAuth2RedirectUrl: "http://localhost:8080/swagger/oauth2-redirect.html",
 	}))
 
 	port, _ := strconv.Atoi(os.Getenv("PORT"))

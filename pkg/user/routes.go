@@ -1,11 +1,14 @@
 package user
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"go-fiber-postgres-template/pkg/core"
 
-func UserRouters(app *fiber.App) {
-	app.Get("/users", GetAllUsers)
-	app.Post("/register", CreateUser)
-	app.Get("/users/me", GetAllUsers)
+	"github.com/gofiber/fiber/v2"
+)
+
+func UserRouters(app fiber.Router) {
+	app.Get("/users", core.IsAuthenticated(), GetAllUsers)
+	app.Get("/users/me", core.IsAuthenticated(), GetAllUsers)
 	app.Put("/users/:id", GetAllUsers)
 	app.Patch("/users/:id", GetAllUsers)
 	app.Delete("/users/:id", GetAllUsers)

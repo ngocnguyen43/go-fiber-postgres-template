@@ -1,8 +1,28 @@
-basePath: /
+basePath: /api
 definitions:
-  go-fiber-postgres-template_pkg_core.ErrorResponse:
+  pkg_auth.AuthResponse:
     properties:
-      details:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  pkg_auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  pkg_auth.RegisterRequest:
+    properties:
+      email:
+        type: string
+      names:
+        type: string
+      password:
+        type: string
+      username:
         type: string
     type: object
   pkg_user.User:
@@ -51,14 +71,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
       summary: Hello World example
       tags:
       - Hello World
@@ -72,17 +84,49 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
       summary: Health example
       tags:
       - Health
+  /login:
+    post:
+      description: Login
+      parameters:
+      - description: The input user struct
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_auth.AuthResponse'
+      summary: Login
+      tags:
+      - Auth
+  /register:
+    post:
+      description: Register a new user
+      parameters:
+      - description: The input user struct
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_auth.AuthResponse'
+      summary: Register a new user
+      tags:
+      - Auth
   /users:
     get:
       description: Retrieves a list of all users from the database
@@ -95,14 +139,8 @@ paths:
             items:
               $ref: '#/definitions/pkg_user.User'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
+      security:
+      - JWT: []
       summary: Get All Users
       tags:
       - Users
@@ -124,15 +162,12 @@ paths:
           description: ok
           schema:
             $ref: '#/definitions/pkg_user.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/go-fiber-postgres-template_pkg_core.ErrorResponse'
       summary: Create a New User
       tags:
       - Users
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

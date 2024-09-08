@@ -10,5 +10,5 @@ type User struct {
 	Password      string               `gorm:"not null" json:"-"`
 	FullName      string               `gorm:"size:255;default:''" json:"fullname"`
 	RefreshTokens []RefreshTokenFamily `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
-	ID            uint                 `gorm:"primarykey"`
+	ID            uint                 `gorm:"primarykey" json:"id"`
 }

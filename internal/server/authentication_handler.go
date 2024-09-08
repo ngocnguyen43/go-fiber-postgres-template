@@ -12,13 +12,13 @@ import (
 
 // Register godoc
 //
-// @Summary		Register a new user
-// @Description	This endpoint is use for register a new user
-// @Tags			Auth
-// @Produce		json
-// @Param			data	body		dtos.RegisterInput	true	"The input user struct"
-// @Success		200  {object} 		dtos.RegisterResponse
-// @Router			/auth/register [post]
+// @Summary				Register a new user
+// @Description	This 	endpoint is use for register a new user
+// @Tags				Auth
+// @Produce				json
+// @Param				request	body		dtos.RegisterInput	true	"The input user struct"
+// @Success				200  {object} 		dtos.RegisterResponse
+// @Router				/auth/register [post]
 func (s *FiberServer) RegisterHandler(c *fiber.Ctx) error {
 	var input dtos.RegisterInput
 	validate := s.validator

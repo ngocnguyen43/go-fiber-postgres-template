@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"strconv"
 	"time"
@@ -12,8 +13,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
-	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/jackc/pgx/v5/stdlib"    //nolint:golint // no need to check this
+	_ "github.com/joho/godotenv/autoload" //nolint:golint // no need to check this
 )
 
 // Service represents a service that interacts with a database.
@@ -39,6 +40,7 @@ var (
 	username   = os.Getenv("DB_USERNAME")
 	port       = os.Getenv("DB_PORT")
 	host       = os.Getenv("DB_HOST")
+	schema     = os.Getenv("DB_SCHEMA")
 	dbInstance *service
 )
 
@@ -62,9 +64,15 @@ func New() Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, username, password, database, port)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	connStr := fmt.Sprintf(
+		"postgres://%s:%s@%s/%s?sslmode=disable&search_path=%s",
+		username,
+		password,
+		net.JoinHostPort(host, port),
+		database,
+		schema,
+	)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
@@ -80,25 +88,25 @@ func New() Service {
 // Health checks the health of the database connection by pinging the database.
 // It returns a map with keys indicating various health statistics.
 func (s *service) Health() map[string]string {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	_, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	stats := make(map[string]string)
 
 	// Ping the database
-	postgresDB, err := s.db.DB()
-
+	dbClient, err := s.db.DB()
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Panicf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
+		log.Printf("db down: %v", err) // Log the error and terminate the program //nolint:gocritic // no need to check this
 		return stats
 	}
-	err = postgresDB.PingContext(ctx)
-	if err != nil {
+
+	// Ping the database with context
+	if err = dbClient.Ping(); err != nil {
 		stats["status"] = "down"
-		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Panicf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
+		stats["error"] = fmt.Sprintf("db ping error: %v", err)
+		log.Printf("db ping error: %v", err) // Log the error
 		return stats
 	}
 	// Database is up, add more statistics
@@ -106,7 +114,7 @@ func (s *service) Health() map[string]string {
 	stats["message"] = "It's healthy"
 
 	// Get database stats (like open connections, in use, idle, etc.)
-	dbStats := postgresDB.Stats()
+	dbStats := dbClient.Stats()
 	stats["open_connections"] = strconv.Itoa(dbStats.OpenConnections)
 	stats["in_use"] = strconv.Itoa(dbStats.InUse)
 	stats["idle"] = strconv.Itoa(dbStats.Idle)

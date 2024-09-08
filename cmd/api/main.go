@@ -2,50 +2,48 @@ package main
 
 import (
 	"fmt"
-	internalServer "go-fiber-postgres-template/internal/server"
+	"go-fiber-postgres-template/internal/server"
+	"go-fiber-postgres-template/internal/utils"
+	"log"
 	"os"
 	"strconv"
 
-	"github.com/gofiber/swagger"
-
 	_ "go-fiber-postgres-template/docs"
 
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-//	@title						Fiber Example API
-//	@version					1.0
-//	@description				This is a sample swagger for Fiber
-//	@termsOfService				http://swagger.io/terms/
-//	@contact.name				API Support
-//	@contact.email				fiber@swagger.io
-//	@license.name				Apache 2.0
-//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
-//	@host						localhost:8080
-//	@BasePath					/api
-//	@securityDefinitions.apiKey	JWT
-//	@in							header
-//	@name						Authorization
-
+// @title						Fiber Example API
+// @version						3.0.0
+// @description					This is a sample swagger for Fiber
+// @termsOfService				http://swagger.io/terms/
+// @contact.name				API Support
+// @contact.email				fiber@swagger.io
+// @license.name				Apache 2.0
+// @license.url					http://www.apache.org/licenses/LICENSE-2.0.html
+// @host						localhost:8080
+// @BasePath					/api/v1
+// @securityDefinitions.apiKey	JWT
+// @in							header
+// @name						Authorization
 func main() {
-	server := internalServer.New()
-	server.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} ${latency} - ${method} ${path} \n",
-	}))
-	server.RegisterFiberRoutes()
-	server.Get("/docs/*", swagger.HandlerDefault) // default
+	keysDir := "keys"
+	bits := 2048
 
-	server.Get("/docs/*", swagger.New(swagger.Config{ // custom
-		URL:         "http://example.com/doc.json",
-		DeepLinking: false,
-		// Expand ("list") or Collapse ("none") tag groups by default
-		DocExpansion: "none",
-	}))
-
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	err := server.Listen(fmt.Sprintf(":%d", port))
+	if err := os.MkdirAll(keysDir, 0700); err != nil {
+		log.Printf("Failed to create keys directory: %v\n", err)
+		return
+	}
+	privateKey, err := utils.EnsureRSAKeys(keysDir, bits)
 	if err != nil {
-		panic(fmt.Sprintf("cannot start server: %s", err))
+		log.Printf("Failed to ensure RSA keys: %v\n", err)
+		return
+	}
+	server := server.New(privateKey)
+	server.RegisterFiberRoutes()
+	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	err = server.Listen(fmt.Sprintf(":%d", port))
+	if err != nil {
+		panic(fmt.Sprintf("Cannot start server: %s", err))
 	}
 }

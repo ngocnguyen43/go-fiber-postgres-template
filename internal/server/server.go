@@ -1,8 +1,10 @@
 package server
 
 import (
+	"crypto/rsa"
 	"errors"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
 	"go-fiber-postgres-template/internal/database"
@@ -14,12 +16,16 @@ type FiberServer struct {
 	*fiber.App
 
 	db database.Service
+
+	key *rsa.PrivateKey
+
+	validator *validator.Validate
 }
 type ErrorResponse struct {
-	Details string
+	Details string `json:"details"`
 }
 
-func New() *FiberServer {
+func New(privateKey *rsa.PrivateKey) *FiberServer {
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
 			ServerHeader: "go-fiber-postgres-template",
@@ -27,17 +33,14 @@ func New() *FiberServer {
 			JSONEncoder:  json.Marshal,
 			JSONDecoder:  json.Unmarshal,
 			ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-				// Status code defaults to 500
-				var code = fiber.StatusInternalServerError
-				// Retrieve the custom status code if it's a *fiber.Error
 				var e *fiber.Error
-				var errorResponse = ErrorResponse{
+				code := fiber.StatusInternalServerError
+				errorResponse := ErrorResponse{
 					Details: "Internal Server Error",
 				}
 				if errors.As(err, &e) {
 					code = e.Code
 					errorResponse.Details = e.Message
-
 				}
 				if err != nil {
 					// In case the SendFile fails
@@ -49,7 +52,9 @@ func New() *FiberServer {
 			},
 		}),
 
-		db: database.New(),
+		db:        database.New(),
+		key:       privateKey,
+		validator: validator.New(),
 	}
 	return server
 }

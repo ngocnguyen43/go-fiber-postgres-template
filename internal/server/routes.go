@@ -1,6 +1,9 @@
 package server
 
 import (
+	"go-fiber-postgres-template/internal/utils"
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 
@@ -39,26 +42,34 @@ func (s *FiberServer) RegisterFiberRoutes() {
 
 	{
 		users := v1.Group("users")
-		users.Use(jwtMiddleware.New(jwtMiddleware.Config{
-			SigningKey: jwtMiddleware.SigningKey{
-				JWTAlg: jwtMiddleware.RS256,
-				Key:    s.key.Public(),
-			},
-			SuccessHandler: func(c *fiber.Ctx) error {
-				user := c.Locals("user").(*jwt.Token)
-				claims := user.Claims.(jwt.MapClaims)
-
-				if claims["typ"] != "access" {
-					return fiber.NewError(fiber.StatusUnauthorized, "Invalid token type")
-				}
-
-				return c.Next()
-			},
-		}))
+		users.Use(s.JwtMiddleware())
 		users.Get("/me", s.GetMeHandler)
 	}
 }
 
 func (s *FiberServer) healthHandler(c *fiber.Ctx) error {
 	return c.JSON(s.db.Health())
+}
+
+func (s *FiberServer) JwtMiddleware() func(*fiber.Ctx) error {
+	return jwtMiddleware.New(jwtMiddleware.Config{
+		SigningKey: jwtMiddleware.SigningKey{
+			JWTAlg: jwtMiddleware.RS256,
+			Key:    s.key.Public(),
+		},
+		SuccessHandler: func(c *fiber.Ctx) error {
+			user := c.Locals("user").(*jwt.Token)
+			claims := user.Claims.(jwt.MapClaims)
+
+			if claims["typ"] != utils.Access {
+				return fiber.NewError(fiber.StatusUnauthorized, "Invalid token type")
+			}
+
+			return c.Next()
+		},
+		ErrorHandler: func(_ *fiber.Ctx, err error) error {
+			log.Println(err)
+			return fiber.NewError(fiber.StatusUnauthorized, "Invalid or expired token")
+		},
+	})
 }

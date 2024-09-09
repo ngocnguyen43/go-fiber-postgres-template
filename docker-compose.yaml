@@ -1,0 +1,76 @@
+version: '3.9'
+services:
+  app:
+    container_name: go-fiber-postgres-template
+    build: 
+      context: .
+      dockerfile: ./docker/app.Dockerfile
+    ports: 
+      - 8080:8080 
+    restart: on-failure
+    # volumes:
+    #   - api:/usr/src/app/
+    depends_on:
+      - migrations
+    environment:
+      - DB_HOST=db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=postgres
+      - DB_SCHEMA=public
+      - PORT=8080
+      - ENV=dev
+    expose:
+      - 8080
+    networks:
+      - fullstack
+
+  migrations:
+    container_name: go-fiber-postgres-template-migrations
+    build: 
+      context: .
+      dockerfile: ./docker/migrations.Dockerfile
+    depends_on:
+      db:
+          condition: service_healthy
+    restart: no
+    environment:
+      - DB_HOST=db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=postgres
+      - DB_SCHEMA=public
+    networks:
+      - fullstack
+    volumes:
+      - ./migrations/:/migrations
+
+  db:
+    image: postgres:latest
+    container_name: postgres
+    expose:
+      - 5432
+    environment: 
+      - POSTGRES_USER=postgres 
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s 
+    # volumes:
+    #   - database_postgres:/var/lib/postgresql/data
+    networks:
+      - fullstack
+
+
+volumes:
+  api:
+  database_postgres:              
+
+networks:
+  fullstack:
+    driver: bridge
+

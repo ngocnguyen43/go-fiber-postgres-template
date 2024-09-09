@@ -1,4 +1,4 @@
-FROM golang:1.22.4-alpine AS build
+FROM golang:1.22.6-alpine AS build
 
 WORKDIR /build
 COPY go.mod go.sum ./
@@ -14,13 +14,5 @@ FROM alpine
 WORKDIR /app
 
 COPY --from=build /build/run .
-
-ENV PORT 8000
-ENV DB_HOST localhost
-ENV DB_PORT 5432
-ENV DB_DATABASE webhook
-ENV DB_USERNAME minhngocnguyen
-ENV DB_PASSWORD minhngoc.403
-ENV DB_SCHEMA public
 
 CMD ["/app/run"]

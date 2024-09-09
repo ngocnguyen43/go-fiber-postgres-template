@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/lestrrat-go/jwx/jwk"
 )
@@ -55,7 +56,7 @@ func (s *FiberServer) JwksHandler(c *fiber.Ctx) error {
 
 	jwkSet := jwk.NewSet()
 	jwkSet.Add(jwkKey)
-	jwkKey.Set(jwk.AlgorithmKey, "RS256")
+	jwkKey.Set(jwk.AlgorithmKey, jwtware.RS256)
 	jwkKey.Set(jwk.KeyUsageKey, "sig")
 
 	return c.Status(http.StatusOK).JSON(jwkSet)

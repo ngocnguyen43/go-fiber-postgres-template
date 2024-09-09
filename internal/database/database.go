@@ -28,6 +28,8 @@ type Service interface {
 	Close() error
 
 	GetInstance() *gorm.DB
+
+	GetTestInstance() *gorm.DB
 }
 
 type service struct {
@@ -41,6 +43,7 @@ var (
 	port       = os.Getenv("DB_PORT")
 	host       = os.Getenv("DB_HOST")
 	schema     = os.Getenv("DB_SCHEMA")
+	env        = os.Getenv("ENV")
 	dbInstance *service
 )
 
@@ -50,16 +53,23 @@ const (
 )
 
 func New() Service {
-	var newLogger = logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
+	var loggerConfig logger.Config
+
+	if env == "dev" {
+		loggerConfig = logger.Config{
 			SlowThreshold:             time.Second, // Slow SQL threshold
 			LogLevel:                  logger.Info, // Log level
 			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
 			ParameterizedQueries:      true,        // Don't include params in the SQL log
-			Colorful:                  false,       // Disable color
-		},
+			Colorful:                  true,        // Disable color
+		}
+	}
+
+	var newLogger = logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		loggerConfig,
 	)
+
 	// Reuse Connection
 	if dbInstance != nil {
 		return dbInstance
@@ -153,5 +163,9 @@ func (s *service) Close() error {
 }
 
 func (s *service) GetInstance() *gorm.DB {
+	return s.db
+}
+
+func (s *service) GetTestInstance() *gorm.DB {
 	return s.db
 }

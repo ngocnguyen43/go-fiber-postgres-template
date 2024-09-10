@@ -40,7 +40,7 @@ down:
 # Test the application
 test:
 	@echo "Testing..."
-	@go test ./tests -v
+	@go test $$(go list ./... | grep -v -e '/models' -e '/dtos' -e '/docs')
 
 # Clean the binary
 clean:

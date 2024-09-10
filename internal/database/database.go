@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"go-fiber-postgres-template/internal/models"
 	"log"
 	"net"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
@@ -28,8 +30,6 @@ type Service interface {
 	Close() error
 
 	GetInstance() *gorm.DB
-
-	GetTestInstance() *gorm.DB
 }
 
 type service struct {
@@ -60,7 +60,7 @@ func New() Service {
 			SlowThreshold:             time.Second, // Slow SQL threshold
 			LogLevel:                  logger.Info, // Log level
 			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      true,        // Don't include params in the SQL log
+			ParameterizedQueries:      false,       // Don't include params in the SQL log
 			Colorful:                  true,        // Disable color
 		}
 	}
@@ -166,6 +166,32 @@ func (s *service) GetInstance() *gorm.DB {
 	return s.db
 }
 
-func (s *service) GetTestInstance() *gorm.DB {
-	return s.db
+func GetTestInstance() Service {
+	testDB, err := gorm.Open(sqlite.Open("gorm_test.db"), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		log.Printf("open test db error: %v", err)
+	}
+	err = testDB.AutoMigrate(&models.User{}, &models.RefreshToken{}, &models.RefreshTokenFamily{})
+	if err != nil {
+		log.Printf("migrate test db error: %v", err)
+	}
+	dbInstance = &service{
+		db: testDB,
+	}
+	return dbInstance
+}
+
+func CloseTestDBInstance(testDB *gorm.DB) error {
+	db, err := testDB.DB()
+	if err != nil {
+		return err
+	}
+	err = db.Close()
+	if err != nil {
+		return err
+	}
+	err = os.Remove("gorm_test.db")
+	return err
 }

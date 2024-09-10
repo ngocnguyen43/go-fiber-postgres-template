@@ -46,17 +46,17 @@ func (s *FiberServer) RegisterHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "User created successfully"})
 }
 
-// LoginHandler godoc
+// Login 		godoc
 //
-// @Summary Login a user
+// @Summary 	Login a user
 // @Schemes
 // @Description This endpoint allows a user to login by providing an email and password.
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body dtos.LoginInput true "Login Input"
-// @Success 200 {object} dtos.LoginResponse
-// @Router /auth/login [post]
+// @Tags 		Auth
+// @Accept 		json
+// @Produce 	json
+// @Param 		request body dtos.LoginInput true "Login Input"
+// @Success 	200 {object} dtos.LoginResponse
+// @Router 		/auth/login [post]
 func (s *FiberServer) LoginHandler(c *fiber.Ctx) error {
 	var input dtos.LoginInput
 	validate := s.validator

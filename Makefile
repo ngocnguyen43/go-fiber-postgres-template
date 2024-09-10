@@ -1,6 +1,11 @@
 # Simple Makefile for a Go project
-
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 # Build the application
+args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
+
 all: build
 
 build:
@@ -13,25 +18,18 @@ build:
 run:
 	@go run cmd/api/main.go
 
-# Run database migrations up
-migrate-up:
-	@go run cmd/migrate/main.go --exec up
-
-# Run database migrations down
-migrate-down:
-	@go run cmd/migrate/main.go --exec down
-
 # Create DB container
-docker-run:
-	@if docker compose up 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose up; \
-	fi
+up:
+	# @if docker compose up 2>/dev/null; then \
+	# 	: ; \
+	# else \
+	# 	echo "Falling back to Docker Compose V1"; \
+	# 	docker-compose up; \
+	# fi
+	@docker compose up
 
 # Shutdown DB container
-docker-down:
+down:
 	@if docker compose down 2>/dev/null; then \
 		: ; \
 	else \
@@ -42,7 +40,7 @@ docker-down:
 # Test the application
 test:
 	@echo "Testing..."
-	@go test ./tests -v
+	@go test $$(go list ./... | grep -v -e '/models' -e '/dtos' -e '/docs')
 
 # Clean the binary
 clean:
@@ -67,3 +65,6 @@ watch:
 	fi
 
 .PHONY: all build run test clean
+
+nah:
+	@echo $(call args,defaultstring)

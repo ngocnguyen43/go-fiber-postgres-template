@@ -5,16 +5,25 @@ One Paragraph of project description goes here
 ## Getting Started
 
 
-## Generate Swagger Docs
+## Generate Swagger Docs (require swaggo [link](https://github.com/swaggo/swag))
 
-default API docs<br>
-http://localhost:8080/docs
-
-generate APIs docs
 ```bash
 swag init -d ./cmd/api,./ --parseDependency --parseInternal
 ```
 
+## Migration (require atlasgo [link](https://atlasgo.io/))
+
+### Generate sql file
+```bash
+atlas migrate diff  <migration_name>  --env gorm 
+```
+**_NOTE:_** _Add models struct inside `cmd/loader/main.go`_
+
+### Apply migartions
+```bash
+atlas migrate apply --url "postgres://localhost:postgres@:5432/go-fiber?search_path=public&sslmode=disable"
+``` 
+  
 ## MakeFile
 
 run all make commands with clean tests
@@ -35,6 +44,14 @@ make run
 live reload the application
 ```bash
 make watch
+```
+docker compose up
+```bash
+make up
+```
+docker compose down
+```bash
+make down
 ```
 
 run the test suite

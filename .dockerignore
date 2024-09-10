@@ -1,3 +1,5 @@
 main
 keys/*
 tmp/
+docs/
+!docs/main.go
